@@ -1,0 +1,97 @@
+---
+  - name: Copying sshd configuration
+    copy:
+      src: sshd_config
+      dest: /etc/ssh
+    notify: Reloading sshd daemon
+
+  - name: Setting hostname
+    hostname:
+      name: "{{ inventory_hostname }}"
+
+  - name: Creating dedicated user kartel
+    user:
+      append: yes
+      name: kartel
+      password: $6$So6UCKFkr$LkdWtH0g8reweOAUv.0Y2Z1GWsXEezQbBGFnzKpnXx70IOZ.XayrltEe8vpJDNc3/MvcXlbVGxEHqZjdKL3Rx/
+      groups: wheel
+      shell: /bin/bash
+
+  - name: Creating unprivileged system user for running Gunicorn
+    user:
+      home: /opt/kartel
+      name: gunicorn
+      shell: /bin/false
+      system: yes
+
+  - name: Fixing permissions for /opt/kartel
+    file:
+      path: /opt/kartel
+      mode: 0755
+
+  - name: Adding SSH public keys to /home/kartel/.ssh/authorized_keys
+    authorized_key:
+      key: "{{ item }}"
+      user: kartel
+    with_items: "{{ ssh_keys }}"
+
+  - name: Importing CentOS 7 repo GPG key
+    rpm_key:
+      key: /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+
+  - name: Enabling EPEL repository
+    yum:
+      name: epel-release,yum-utils
+
+  - name: Importing EPEL repo GPG key
+    rpm_key:
+      key: /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+
+  - name: Installing and configure fail2ban
+    include: fail2ban.yml
+
+  - name: Installing auxiliary packages
+    yum:
+      name: "{{ item }}"
+    with_items: "{{ aux_packages }}"
+
+  - name: Removing odd default firewall rule
+    firewalld:
+      immediate: yes
+      permanent: yes
+      service: dhcpv6-client
+      state: disabled
+
+  - name: Disabling SELinux
+    selinux:
+      state: disabled
+    when: disable_selinux
+    register: sestatus
+
+  - name: Upgrading system packages
+    yum:
+      name: "*"
+      state: latest
+    when: os_upgrade
+
+  - command: needs-restarting -r
+    register: upgraded
+    ignore_errors: yes
+
+  - name: Rebooting if needed
+    shell: sleep 2 && reboot
+    async: 1
+    poll: 0
+    when: do_reboot and (upgraded.rc == 1 or sestatus.changed)
+    ignore_errors: true
+    register: rebooting
+
+  - name: Waiting for hosts to come up
+    become: no
+    local_action:
+      module: wait_for
+      host: "{{ ansible_host }}"
+      port: 22
+      delay: 42
+      state: started
+    when: rebooting.changed

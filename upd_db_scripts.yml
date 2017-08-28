@@ -1,0 +1,31 @@
+---
+  - name: Fetching DB scripts
+    hosts:
+     - localhost
+    gather_facts: no
+    become: no
+    tasks:
+      - local_action:
+          module: git
+          repo: 'git@git.kartel.com.ru:multipass/db/masserv.git'
+          dest: /home/kartel/playbooks/pgdb_scripts
+      - local_action:
+          module: shell cd /home/kartel/playbooks && tar czf pgdb_scripts.tar.gz pgdb_scripts
+
+  - name: Cleaning up
+    hosts:
+      - database
+    gather_facts: no
+    tasks:
+      - shell: rm -rf /var/lib/pgsql/pgdb_scripts
+
+  - name: Distributing DB scripts
+    hosts:
+      - database
+    gather_facts: no
+    tasks:
+      - unarchive:
+          src: /home/kartel/playbooks/pgdb_scripts.tar.gz
+          dest: /var/lib/pgsql
+          group: postgres
+          owner: postgres

@@ -1,0 +1,46 @@
+---
+  - name: Opening firewall for RabbitMQ access
+    firewalld:
+      immediate: yes
+      permanent: yes
+      port: 5672/tcp
+      state: enabled
+
+  - name: Installing rabbitmq_rabbitmq-server repo
+    copy:
+      src: rabbitmq_rabbitmq-server.repo
+      dest: /etc/yum.repos.d
+
+  - name: Copying rabbitmq_rabbitmq-server repo GPG key
+    copy:
+      src: rabbitmq_rabbitmq-server.gpgkey
+      dest: /home/ansible
+
+  - name: Importing rabbitmq_rabbitmq-server repo GPG key
+    rpm_key:
+      key: /home/ansible/rabbitmq_rabbitmq-server.gpgkey
+
+  - name: Deleting rabbitmq_rabbitmq-server repo GPG key
+    file:
+      path: /home/ansible/rabbitmq_rabbitmq-server.gpgkey
+      state: absent
+
+  - name: Installing RabbitMQ server package
+    yum:
+      name: rabbitmq-server
+
+  - name: Enabling and starting rabbitmq-server service
+    service:
+      name: rabbitmq-server
+      enabled: yes
+      state: started
+
+  - name: Adding RabbitMQ user
+    command: rabbitmqctl add_user kartel 11
+    ignore_errors: yes
+
+  - name: Assigning administrator role to RabbitMQ user
+    command: rabbitmqctl set_user_tags kartel administrator
+
+  - name: Setting permissions for RabbitMQ user
+    command: rabbitmqctl set_permissions -p / kartel ".*" ".*" ".*"

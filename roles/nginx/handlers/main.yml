@@ -1,0 +1,5 @@
+---
+  - name: Reload nginx daemon
+    service:
+      name: nginx
+      state: reloaded

@@ -1,0 +1,29 @@
+# {{ ansible_managed }}
+[Unit]
+Description=User cabinet
+After=network.target
+
+[Service]
+PIDFile=/run/gunicorn/user
+User=gunicorn
+Group=gunicorn
+Environment="CONFIG=/opt/kartel/user/api/config/config.{{ inventory_dir.split('/')[-1] }}.yaml"
+WorkingDirectory=/opt/kartel/
+PrivateTmp=true
+ExecStart=/usr/bin/gunicorn-3.6 \
+        --pid /run/gunicorn/user \
+        --bind=0.0.0.0:8100 \
+        --workers=2 \
+        --worker-class=aiohttp.GunicornWebWorker \
+        --worker-connections=20 \
+        --graceful-timeout=5 \
+        --max-requests=5000 \
+        --timeout=30 \
+      	--log-level=debug \
+	      --capture-output \
+	      --access-logfile=/var/log/kartel/user/access.log \
+	      --error-logfile=/var/log/kartel/user/error.log \
+        user.api.wsgi:app
+
+[Install]
+WantedBy=multi-user.target

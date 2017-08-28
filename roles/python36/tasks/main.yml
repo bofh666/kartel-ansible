@@ -1,0 +1,16 @@
+---
+  - name: Installing IUS repo
+    yum:
+      name: https://centos7.iuscommunity.org/ius-release.rpm
+
+  - name: Importing IUS repo GPG key
+    rpm_key:
+      key: /etc/pki/rpm-gpg/IUS-COMMUNITY-GPG-KEY
+
+  - name: Installing python 3.6 upstream and related libraries
+    yum:
+      name: python36u,python36u-libs
+
+  - name: Installing pip
+    yum:
+      name: python36u-pip

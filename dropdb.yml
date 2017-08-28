@@ -1,0 +1,10 @@
+---
+  - name: Dropping DB
+    hosts:
+      - database
+    gather_facts: no
+    become: yes
+    become_user: postgres
+    tasks:
+      - shell: 'psql -f /var/lib/pgsql/pgdb_scripts/!drop_all.sql'
+    ignore_errors: yes

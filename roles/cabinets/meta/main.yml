@@ -1,0 +1,6 @@
+---
+  dependencies:
+    - nginx
+    - python36
+    - nodejs
+    - yarn

@@ -1,0 +1,11 @@
+[database]
+db[1:4]-dev.kartel.com.ru
+
+[queue]
+mq1-dev.kartel.com.ru
+
+[services]
+svc1-dev.kartel.com.ru
+
+[cabinets]
+cab[1:3]-dev.kartel.com.ru

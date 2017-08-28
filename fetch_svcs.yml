@@ -1,0 +1,70 @@
+---
+  - name: Fetching services
+    hosts:
+     - localhost
+    gather_facts: no
+    become: no
+    tasks:
+      - local_action:
+          module: git
+          repo: 'git@git.kartel.com.ru:multipass/team1/services.git'
+          dest: /home/kartel/playbooks/services
+          version: HEAD
+      - local_action:
+          module: shell cd /home/kartel/playbooks && tar czf services.tar.gz services
+
+  - name: Cleaning up
+    hosts:
+      - services
+    gather_facts: no
+    tasks:
+      - shell: rm -rf /opt/kartel/*
+
+  - name: Distributing services
+    hosts:
+      - services
+    gather_facts: no
+    tasks:
+      - unarchive:
+          src: /home/kartel/playbooks/services.tar.gz
+          dest: /opt/kartel
+          group: gunicorn
+          owner: gunicorn
+
+  - name: Installing requirements for services
+    hosts:
+      - services
+    gather_facts: no
+    tasks:
+      - shell: pip3.6 install -r /opt/kartel/services/{{ item }}/requirements.txt
+        with_items: "{{ kartel_services }}"
+
+  - name: Updating systemd configuration
+    hosts:
+      - cabinets
+    gather_facts: no
+    tasks:
+      - command: systemctl daemon-reload
+
+
+  - name: Stopping services in case of version change
+    hosts:
+      - services
+    gather_facts: no
+    tasks:
+      - service:
+          name: "{{ item }}"
+          state: stopped
+        with_items: "{{ kartel_services }}"
+        ignore_errors: yes
+
+  - name: Ensuring that services are enabled and started
+    hosts:
+      - services
+    gather_facts: no
+    tasks:
+      - service:
+          name: "{{ item }}"
+          enabled: yes
+          state: started
+        with_items: "{{ kartel_services }}"

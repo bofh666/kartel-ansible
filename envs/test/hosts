@@ -1,0 +1,11 @@
+[database]
+db1-test.kartel.com.ru
+
+[queue]
+mq1-test.kartel.com.ru
+
+[services]
+svc1-test.kartel.com.ru
+
+[cabinets]
+cab1-test.kartel.com.ru

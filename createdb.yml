@@ -1,0 +1,13 @@
+---
+  - include: dropdb.yml
+  
+  - include: upd_db_scripts.yml
+
+  - name: Creating DB
+    hosts:
+      - database
+    gather_facts: no
+    become: yes
+    become_user: postgres
+    tasks:
+      - shell: 'psql -f /var/lib/pgsql/pgdb_scripts/!run_all.sql'

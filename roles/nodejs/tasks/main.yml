@@ -1,0 +1,16 @@
+---
+  - name: Installing development tools
+    yum:
+      name: gcc-c++,make
+
+  - name: Installing nodesource repo
+    yum:
+      name: https://rpm.nodesource.com/pub_7.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm
+
+  - name: Importing nodesource repo GPG key
+    rpm_key:
+      key: /etc/pki/rpm-gpg/NODESOURCE-GPG-SIGNING-KEY-EL
+
+  - name: Installing nodejs package
+    yum:
+      name: nodejs

@@ -1,0 +1,66 @@
+---
+  - name: Opening firewall for HTTP and HTTPS access
+    firewalld:
+      immediate: yes
+      permanent: yes
+      service: "{{ item }}"
+      state: enabled
+    with_items:
+      - http
+      - https
+
+  - name: Installing nginx repo
+    copy:
+      src: nginx.repo
+      dest: /etc/yum.repos.d
+
+  - name: Importing nginx repo GPG key
+    rpm_key:
+      key: http://nginx.org/keys/nginx_signing.key
+
+  - name: Installing nginx package
+    yum:
+      name: nginx
+
+  - name: Copying private key for SSL certificate
+    copy:
+      src: STAR_kartel_com_ru.key
+      dest: /etc/pki/tls/private
+      mode: 0600
+      owner: root
+      group: root
+
+  - name: Copying SSL certificate
+    copy:
+      src: STAR_kartel_com_ru.crt
+      dest: /etc/pki/tls/certs
+
+  - stat: path=/etc/ssl/certs/dhparam.pem
+    register: dh
+
+  - name: Generating DH parameters
+    command: openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+    when: not dh.stat.exists
+
+  - name: Copying robots.txt
+    copy:
+      src: robots.txt
+      dest: /etc/nginx
+
+  - name: Deleting obsolete nginx configuration
+    shell: rm -rf /etc/nginx/conf.d/*
+
+  - name: Generating new nginx configuration
+    template:
+      src: "{{ group_names[-1] }}.conf.j2"
+      dest: "/etc/nginx/conf.d/{{ group_names[-1] }}.conf"
+
+  - name: Validate nginx configuration
+    command: nginx -t
+    notify: Reload nginx daemon
+
+  - name: Enabling and starting nginx service
+    service:
+      name: nginx
+      enabled: yes
+      state: started

@@ -1,0 +1,5 @@
+---
+  kartel_cabinets:
+    - admin
+    - provider
+    - user

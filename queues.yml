@@ -1,0 +1,6 @@
+---
+  - name: QUEUES | Deploying RabbitMQ
+    hosts:
+      - queue
+    roles:
+      - rabbitmq

@@ -1,0 +1,29 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Kartel Whitelists service
+After=network.target
+
+[Service]
+PIDFile=/run/gunicorn/whitelists
+User=gunicorn
+Group=gunicorn
+Environment="CONFIG=/opt/kartel/services/whitelists/config/whitelists_{{ inventory_dir.split('/')[-1] }}.yaml"
+WorkingDirectory=/opt/kartel/
+PrivateTmp=true
+ExecStart=/usr/bin/gunicorn-3.6 \
+        --pid /run/gunicorn/whitelists \
+        --bind=0.0.0.0:8003 \
+        --workers=2 \
+        --worker-class=aiohttp.GunicornWebWorker \
+        --worker-connections=20 \
+        --graceful-timeout=5 \
+        --max-requests=5000 \
+        --timeout=30 \
+	--log-level=info \
+	--capture-output \
+	--access-logfile=/var/log/kartel/whitelists/access.log \
+	--error-logfile=/var/log/kartel/whitelists/error.log \
+        services.whitelists.wsgi:app
+
+[Install]
+WantedBy=multi-user.target

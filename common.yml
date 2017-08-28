@@ -1,0 +1,7 @@
+---
+  - name: COMMON | Deploying common environment configuration
+    hosts:
+      - all
+    gather_facts: yes
+    roles:
+      - common

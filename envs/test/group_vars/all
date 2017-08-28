@@ -1,0 +1,9 @@
+kartel_services:
+  - saver
+  - status
+  - transactions
+  - whitelists
+kartel_cabinets:
+  - user
+  - provider
+  - admin

@@ -1,0 +1,6 @@
+---
+  kartel_services:
+    - saver
+    - status
+    - transactions
+    - whitelists

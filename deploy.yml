@@ -1,0 +1,7 @@
+---
+  - include: common.yml
+  - include: databases.yml
+  - include: createdb.yml
+  - include: queues.yml
+  - include: services.yml
+  - include: cabinets.yml

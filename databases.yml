@@ -1,0 +1,8 @@
+---
+  - name: DATABASES | Deploying PostgreSQL
+    hosts:
+      - database
+    roles:
+      - postgresql
+
+  - include: createdb

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<service>
+  <short>RabbitMQ</short>
+  <description>RabbitMQ Message Broker</description>
+  <port protocol="tcp" port="5672"/>
+</service>

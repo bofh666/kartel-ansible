@@ -1,0 +1,37 @@
+---
+  - name: Opening firewall for PostgreSQL access
+    firewalld:
+      immediate: yes
+      permanent: yes
+      service: postgresql
+      state: enabled
+
+  - name: Enabling PostgreSQL repo
+    yum:
+      name: https://yum.postgresql.org/9.6/redhat/rhel-7-x86_64/pgdg-redhat96-9.6-3.noarch.rpm
+
+  - name: Installing PostgreSQL 9.6
+    yum:
+      name: postgresql96-server,postgresql96-contrib
+
+  - name: Initializing database
+    command: /usr/pgsql-9.6/bin/postgresql96-setup initdb
+    ignore_errors: yes
+
+  - name: Generating PostrgrSQL general configuration
+    template:
+      src: postgresql.conf.j2
+      dest: /var/lib/pgsql/9.6/data/postgresql.conf
+    notify: Restarting PostgreSQL
+
+  - name: Generating PostgreSQL HBA configuratioon
+    template:
+      src: pg_hba.conf.j2
+      dest: /var/lib/pgsql/9.6/data/pg_hba.conf
+    notify: Restarting PostgreSQL
+
+  - name: Enabling and starting PostgreSQL
+    service:
+      name: postgresql-9.6
+      enabled: yes
+      state: started

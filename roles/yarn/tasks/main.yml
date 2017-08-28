@@ -1,0 +1,13 @@
+---
+  - name: Installing yarn repo
+    get_url:
+      url: https://dl.yarnpkg.com/rpm/yarn.repo
+      dest: /etc/yum.repos.d
+
+  - name: Importing yarn repo GPG key
+    rpm_key:
+      key: https://dl.yarnpkg.com/rpm/pubkey.gpg
+
+  - name: Installing yarn package
+    yum:
+      name: yarn

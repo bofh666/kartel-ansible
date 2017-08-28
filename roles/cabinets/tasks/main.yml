@@ -1,0 +1,56 @@
+---
+  - name: Installing Node.js related stuff
+    shell: 'cd /home/kartel; yarn add --ignore-optional --no-progress --silent --no-emoji --non-interactive --dev webpack@2.6.1 webpack-dev-server@2.5.0; chown -R kartel: /home/kartel'
+
+  - name: Installing Gunicorn
+    yum:
+      name: python36u-gunicorn
+
+  - name: Creating systemd unit files for cabinets
+    template:
+      src: "{{ item }}.service.j2"
+      dest: /etc/systemd/system/{{ item }}.service
+    with_items: "{{ kartel_cabinets }}"
+
+#  - name: Update systemd configuration
+#    command: systemctl daemon-reload
+
+  - name: Creating systemd temporary directory configuration for Gunicorn PID files
+    copy:
+      content: d /run/gunicorn 0755 gunicorn gunicorn -
+      dest: /etc/tmpfiles.d/gunicorn.conf
+
+  - name: Crating the directory itself
+    command: systemd-tmpfiles --create
+
+  - name: Creating directories for log files
+    file:
+      path: /var/log/kartel/{{ item }}
+      group: gunicorn
+      owner: gunicorn
+      mode: 0755
+      state: directory
+    with_items: "{{ kartel_cabinets }}"
+
+  - name: Creating logrotate configuration for cabinets
+    copy:
+      src: kartel
+      dest: /etc/logrotate.d/kartel
+
+#  - name: Install requirements for cabinets
+#    shell: pip3.6 install -r /opt/kartel/{{ item }}/api/requirements.txt
+#    with_items: "{{ kartel_cabinets }}"
+
+#  - name: Stopping cabinets in case of version change
+#    service:
+#      name: "{{ item }}"
+#      state: stopped
+#    with_items: "{{ kartel_cabinets }}"
+#    ignore_errors: yes
+
+#  - name: Ensure that cabinets are enabled and started
+#    service:
+#      name: "{{ item }}"
+#      enabled: yes
+#      state: started
+#    with_items: "{{ kartel_cabinets }}"

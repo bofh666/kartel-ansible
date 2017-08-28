@@ -1,0 +1,9 @@
+/var/log/kartel/*/*.log
+{
+    daily
+    rotate 10
+    missingok
+    notifempty
+    compress
+    copytruncate
+}

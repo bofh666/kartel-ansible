@@ -1,0 +1,8 @@
+---
+  - name: SERVICES | Deploying...
+    hosts:
+      - services
+    roles:
+      - services
+
+  - include: fetch_svcs.yml

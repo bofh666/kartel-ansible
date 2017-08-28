@@ -1,0 +1,7 @@
+---
+  - name: Debug
+    hosts:
+      - all
+    gather_facts: no
+    tasks:
+      - debug: msg={{ inventory_dir.split('/')[-1] }}

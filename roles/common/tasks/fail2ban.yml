@@ -1,0 +1,16 @@
+---
+  - name: Installing fail2ban package
+    yum:
+      name: fail2ban
+      state: present
+
+  - name: Copying fail2ban jail configuration
+    copy:
+      src: jail.local
+      dest: /etc/fail2ban
+
+  - name: Enabling and starting fail2ban service
+    service:
+      name: fail2ban
+      enabled: yes
+      state: started

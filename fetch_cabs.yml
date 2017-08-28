@@ -1,0 +1,87 @@
+---
+  - name: Fetching and building cabinets particles
+    hosts:
+     - localhost
+    gather_facts: no
+    become: no
+    tasks:
+      - local_action:
+          module: git
+          repo: 'git@git.kartel.com.ru:multipass/team1/{{ item }}.git'
+          dest: /home/kartel/playbooks/{{ item }}
+          version: master
+        with_items: "{{ kartel_cabinets }}"
+      - local_action:
+          module: shell cd /home/kartel/playbooks/{{ item }} && make build-api
+        with_items: "{{ kartel_cabinets }}"
+      - local_action:
+          module: shell cd /home/kartel/playbooks/{{ item }} && make build-client
+        with_items: "{{ kartel_cabinets }}"
+
+  - name: Cleaning up
+    hosts:
+      - cabinets
+    gather_facts: no
+    tasks:
+      - shell: rm -rf /opt/kartel/*
+
+  - name: Distributing cabinets REST API
+    hosts:
+      - cabinets
+    gather_facts: no
+    tasks:
+      - unarchive:
+          src: /home/kartel/playbooks/{{ item }}/dist/api.tar.gz
+          dest: /opt/kartel
+          group: gunicorn
+          owner: gunicorn
+        with_items: "{{ kartel_cabinets }}"
+
+  - name: Distributing cabinets client application
+    hosts:
+      - cabinets
+    gather_facts: no
+    tasks:
+      - unarchive:
+          src: /home/kartel/playbooks/{{ item }}/dist/client.tar.gz
+          dest: /opt/kartel
+          group: nginx
+          owner: nginx
+        with_items: "{{ kartel_cabinets }}"
+
+  - name: Installing requirements for cabinets
+    hosts:
+      - cabinets
+    gather_facts: no
+    tasks:
+      - shell: pip3.6 install -r /opt/kartel/{{ item }}/api/requirements.txt
+        with_items: "{{ kartel_cabinets }}"
+
+  - name: Updating systemd configuration
+    hosts:
+      - cabinets
+    gather_facts: no
+    tasks:
+      - command: systemctl daemon-reload
+
+  - name: Stopping cabinets in case of version change
+    hosts:
+      - cabinets
+    gather_facts: no
+    tasks:
+      - service:
+          name: "{{ item }}"
+          state: stopped
+        with_items: "{{ kartel_cabinets }}"
+        ignore_errors: yes
+
+  - name: Ensuring that cabinets are enabled and started
+    hosts:
+      - cabinets
+    gather_facts: no
+    tasks:
+      - service:
+          name: "{{ item }}"
+          enabled: yes
+          state: started
+        with_items: "{{ kartel_cabinets }}"

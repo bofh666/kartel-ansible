@@ -1,0 +1,12 @@
+---
+  - name: CABINET | Deploying...
+    hosts:
+      - cabinets
+    roles:
+      - cabinets
+    tasks:
+      - shell: 'cd /home/kartel; yarn add --ignore-optional --no-progress --silent --no-emoji --non-interactive --dev webpack@2.6.1 webpack-dev-server@2.5.0; chown -R kartel: /home/kartel'
+        remote_user: ansible
+        become: yes
+
+  - include: fetch_cabs.yml

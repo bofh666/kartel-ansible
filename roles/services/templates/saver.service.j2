@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Kartel Saver service
+After=network.target
+
+[Service]
+PIDFile=/run/gunicorn/saver
+User=gunicorn
+Group=gunicorn
+WorkingDirectory=/opt/kartel/
+Environment="CONFIG=/opt/kartel/services/saver/config/saver_{{ inventory_dir.split('/')[-1] }}.yaml"
+ExecStart=/bin/python3.6 -m services.saver
+
+[Install]
+WantedBy=multi-user.target
+
