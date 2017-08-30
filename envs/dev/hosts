@@ -1,11 +1,11 @@
 [database]
-db[1:4]-dev.kartel.com.ru
+db[1:4]-dev.domain.tld
 
 [queue]
-mq1-dev.kartel.com.ru
+mq1-dev.domain.tld
 
 [services]
-svc1-dev.kartel.com.ru
+svc1-dev.domain.tld
 
 [cabinets]
-cab[1:3]-dev.kartel.com.ru
+cab[1:3]-dev.domain.tld

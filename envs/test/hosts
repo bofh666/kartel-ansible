@@ -1,11 +1,11 @@
 [database]
-db1-test.kartel.com.ru
+db1-test.domain.tld
 
 [queue]
-mq1-test.kartel.com.ru
+mq1-test.domain.tld
 
 [services]
-svc1-test.kartel.com.ru
+svc1-test.domain.tld
 
 [cabinets]
-cab1-test.kartel.com.ru
+cab1-test.domain.tld
